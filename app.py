@@ -45,13 +45,13 @@ with st.sidebar:
     st.header("📖 How To Use")
     st.write("1. Fill in student details")
     st.write("2. Click Predict")
-    st.write("3. Review prediction, influencing factors & feature importance")
+    st.write("3. Review prediction & recommendations")
     st.markdown("---")
     st.markdown(
         "**Random Forest Classifier**  \n"
         "UCI Student Dataset  \n\n"
         "**Author:** SMJ  \n"
-        "[GitHub](https://github.com/Ph0enix22/student-success-ml-system)"
+        "[GitHub](https://github.com/Ph0enix22)"
     )
 
 # LOAD MODEL & ENCODERS
@@ -75,7 +75,7 @@ st.markdown(
     '<div class="big-font">🎓 Student Performance Predictor</div>',
     unsafe_allow_html=True
 )
-st.caption("Machine Learning system for actionable student success insights.")
+st.caption("ML system to predict if a student will pass or need support.")
 st.markdown("---")
 
 # INPUT FORM - STUDENT DATA COLLECTION
@@ -90,83 +90,133 @@ with st.form("input_form"):
     
     # LEFT COLUMN - Demographics & Academic Background
     with col1:
-        school = st.selectbox("School", ["GP", "MS"])
-        sex = st.selectbox("Gender", ["M", "F"])
+        school_display = st.selectbox("School Type", ["Gabriel Pereira (GP)", "Mousinho da Silveira (MS)"])
+        school = "GP" if "Gabriel" in school_display else "MS"
+        
+        sex_display = st.selectbox("Gender", ["Male", "Female"])
+        sex = "M" if sex_display == "Male" else "F"
+        
         age = st.slider("Age", 15, 22, 17)
-        address = st.radio(
-            "Address",
-            ["U", "R"],
-            help="U=Urban, R=Rural",
+        
+        address_display = st.radio(
+            "Address Type",
+            ["Urban", "Rural"],
             horizontal=True
         )
-        famsize = st.selectbox(
+        address = "U" if address_display == "Urban" else "R"
+        
+        famsize_display = st.selectbox(
             "Family Size",
-            ["LE3", "GT3"],
-            help="LE3=≤3, GT3=>3"
+            ["Small (≤3 members)", "Large (>3 members)"]
         )
-        Pstatus = st.selectbox(
+        famsize = "LE3" if "Small" in famsize_display else "GT3"
+        
+        pstatus_display = st.selectbox(
             "Parent Status",
-            ["T", "A"],
-            help="T=Together, A=Apart"
+            ["Living Together", "Apart"]
         )
+        Pstatus = "T" if "Together" in pstatus_display else "A"
+        
         Medu = st.select_slider(
-            "Mother's Education",
+            "Mother's Education Level",
             [0, 1, 2, 3, 4],
             2,
-            format_func=lambda x: ["None", "Primary", "5-9th", "Secondary", "Higher"][x]
+            format_func=lambda x: ["No education", "Primary school", "5-9th grade", "Secondary school", "Higher education"][x]
         )
+        
         Fedu = st.select_slider(
-            "Father's Education",
+            "Father's Education Level",
             [0, 1, 2, 3, 4],
             2,
-            format_func=lambda x: ["None", "Primary", "5-9th", "Secondary", "Higher"][x]
+            format_func=lambda x: ["No education", "Primary school", "5-9th grade", "Secondary school", "Higher education"][x]
         )
+        
         Mjob = st.selectbox(
             "Mother's Job",
-            ["teacher", "health", "services", "at_home", "other"]
+            ["Teacher", "Healthcare", "Services", "At Home", "Other"]
         )
+        Mjob_map = {"Teacher": "teacher", "Healthcare": "health", "Services": "services", "At Home": "at_home", "Other": "other"}
+        Mjob = Mjob_map[Mjob]
+        
         Fjob = st.selectbox(
             "Father's Job",
-            ["teacher", "health", "services", "at_home", "other"]
+            ["Teacher", "Healthcare", "Services", "At Home", "Other"]
         )
-        reason = st.selectbox(
-            "School Choice Reason",
-            ["home", "reputation", "course", "other"]
+        Fjob = Mjob_map[Fjob]
+        
+        reason_display = st.selectbox(
+            "Reason for School Choice",
+            ["Close to Home", "School Reputation", "Course Preference", "Other"]
         )
-        guardian = st.selectbox("Guardian", ["mother", "father", "other"])
+        reason_map = {"Close to Home": "home", "School Reputation": "reputation", "Course Preference": "course", "Other": "other"}
+        reason = reason_map[reason_display]
+        
+        guardian = st.selectbox("Primary Guardian", ["Mother", "Father", "Other"])
+        guardian = guardian.lower()
+        
         traveltime = st.select_slider(
-            "Travel Time",
+            "Travel Time to School",
             [1, 2, 3, 4],
             1,
-            format_func=lambda x: ["<15min", "15-30min", "30-60min", ">60min"][x-1]
+            format_func=lambda x: ["<15 minutes", "15-30 minutes", "30-60 minutes", ">60 minutes"][x-1]
         )
+        
         studytime = st.select_slider(
-            "Study Time",
+            "Weekly Study Time",
             [1, 2, 3, 4],
             2,
-            format_func=lambda x: ["<2h", "2-5h", "5-10h", ">10h"][x-1]
+            format_func=lambda x: ["<2 hours", "2-5 hours", "5-10 hours", ">10 hours"][x-1]
         )
-        failures = st.number_input("Past Failures", 0, 3, 0)
+        
+        failures = st.number_input("Number of Past Class Failures", 0, 3, 0)
     
     # RIGHT COLUMN - Support, Activities & Social Factors
     with col2:
-        schoolsup = st.selectbox("School Support", ["yes", "no"])
-        famsup = st.selectbox("Family Support", ["yes", "no"])
-        paid = st.selectbox("Extra Paid Classes", ["yes", "no"])
-        activities = st.selectbox("Extra Activities", ["yes", "no"])
-        nursery = st.selectbox("Attended Nursery", ["yes", "no"])
-        higher = st.selectbox("Wants Higher Ed", ["yes", "no"])
-        internet = st.selectbox("Internet at Home", ["yes", "no"])
-        romantic = st.selectbox("In Relationship", ["yes", "no"])
-        famrel = st.slider("Family Relations", 1, 5, 4)
-        freetime = st.slider("Free Time", 1, 5, 3)
-        goout = st.slider("Going Out", 1, 5, 3)
-        Dalc = st.slider("Workday Alcohol", 1, 5, 1)
-        Walc = st.slider("Weekend Alcohol", 1, 5, 1)
-        health = st.slider("Health Status", 1, 5, 3)
-        absences = st.number_input("Absences", 0, 93, 0)
+        schoolsup_display = st.selectbox("School Support Services", ["Yes", "No"])
+        schoolsup = schoolsup_display.lower()
+        
+        famsup_display = st.selectbox("Family Educational Support", ["Yes", "No"])
+        famsup = famsup_display.lower()
+        
+        paid_display = st.selectbox("Takes Extra Paid Classes", ["Yes", "No"])
+        paid = paid_display.lower()
+        
+        activities_display = st.selectbox("Participates in Extra Activities", ["Yes", "No"])
+        activities = activities_display.lower()
+        
+        nursery_display = st.selectbox("Attended Nursery School", ["Yes", "No"])
+        nursery = nursery_display.lower()
+        
+        higher_display = st.selectbox("Wants to Pursue Higher Education", ["Yes", "No"])
+        higher = higher_display.lower()
+        
+        internet_display = st.selectbox("Has Internet at Home", ["Yes", "No"])
+        internet = internet_display.lower()
+        
+        romantic_display = st.selectbox("In a Romantic Relationship", ["Yes", "No"])
+        romantic = romantic_display.lower()
+        
+        famrel = st.slider("Quality of Family Relationships", 1, 5, 4, 
+                          help="1 = Very Poor, 5 = Excellent")
+        
+        freetime = st.slider("Amount of Free Time After School", 1, 5, 3,
+                            help="1 = Very Low, 5 = Very High")
+        
+        goout = st.slider("Frequency of Going Out with Friends", 1, 5, 3,
+                         help="1 = Very Low, 5 = Very High")
+        
+        Dalc = st.slider("Weekday Alcohol Consumption", 1, 5, 1,
+                        help="1 = Very Low/None, 5 = Very High")
+        
+        Walc = st.slider("Weekend Alcohol Consumption", 1, 5, 1,
+                        help="1 = Very Low/None, 5 = Very High")
+        
+        health = st.slider("Current Health Status", 1, 5, 3,
+                          help="1 = Very Bad, 5 = Very Good")
+        
+        absences = st.number_input("Number of School Absences (this period)", 0, 93, 0)
     
-    submit = st.form_submit_button("🔮 Predict", use_container_width=True)
+    submit = st.form_submit_button("🔮 Predict Performance", use_container_width=True)
 
 # PREDICTION & RESULTS DISPLAY
 if submit:
@@ -198,49 +248,67 @@ if submit:
     # Display prediction result with probability
     if prediction == 1:
         st.success("🎉 Predicted: PASS")
-        st.metric("PASS Probability", f"{probability[1]*100:.1f}%")
+        st.metric("Pass Probability", f"{probability[1]*100:.1f}%")
         st.info("This student is likely to succeed. Encourage continued effort and positive habits!")
     else:
         st.error("🚩 Predicted: FAIL")
-        st.metric("FAIL Probability", f"{probability[0]*100:.1f}%")
-        st.warning("Recommend additional academic support and intervention.")
+        st.metric("Fail Probability", f"{probability[0]*100:.1f}%")
+        st.warning("This student may need additional academic support and intervention.")
+
+    st.markdown("---")
+    
+    # Display feature importance from Random Forest
+    if hasattr(model, 'feature_importances_'):
+        st.markdown(
+            '<div class="section-title">📊 General Feature Importance of the model for All Students</div>',
+            unsafe_allow_html=True
+        )
+        importances = pd.DataFrame({
+            'Factor': input_df.columns,
+            'Influence': model.feature_importances_
+        }).sort_values('Influence', ascending=False).head(5)
+        st.bar_chart(importances.set_index('Factor'))
+    
+    st.markdown("---")
 
     # Display key performance factors (based on EDA insights)
     st.markdown(
-        '<div class="section-title">🔍 Key Performance Factors</div>',
+        '<div class="section-title">🔍 Key Performance Indicators</div>',
         unsafe_allow_html=True
     )
     
     colA, colB = st.columns(2)
     
     with colA:
-        st.markdown("**⚠️ Risk Indicators:**")
+        st.markdown("**⚠️ Areas of Concern:**")
         if failures > 0:
             st.markdown(
-                f'<div class="key-factor risk">• {failures} past failures</div>',
+                f'<div class="key-factor risk">• Previous failures: {failures}</div>',
                 unsafe_allow_html=True
             )
         if absences > 10:
             st.markdown(
-                f'<div class="key-factor risk">• High absences: {absences}</div>',
+                f'<div class="key-factor risk">• High absences: {absences} days</div>',
                 unsafe_allow_html=True
             )
         if studytime < 2:
             st.markdown(
-                '<div class="key-factor risk">• Limited study time</div>',
+                '<div class="key-factor risk">• Limited study time (<5 hours/week)</div>',
                 unsafe_allow_html=True
             )
-        if higher == "no":
+        if higher_display == "No":
             st.markdown(
                 '<div class="key-factor risk">• No higher education plans</div>',
                 unsafe_allow_html=True
             )
+        if not any([failures > 0, absences > 10, studytime < 2, higher_display == "No"]):
+            st.markdown('<div class="key-factor">✓ No major concerns identified</div>', unsafe_allow_html=True)
     
     with colB:
-        st.markdown("**✅ Positive Indicators:**")
+        st.markdown("**✅ Positive Factors:**")
         if failures == 0:
             st.markdown(
-                '<div class="key-factor positive">• No past failures</div>',
+                '<div class="key-factor positive">• No previous failures</div>',
                 unsafe_allow_html=True
             )
         if absences < 5:
@@ -250,33 +318,25 @@ if submit:
             )
         if studytime >= 3:
             st.markdown(
-                '<div class="key-factor positive">• Strong study habits</div>',
+                '<div class="key-factor positive">• Strong study habits (>5 hours/week)</div>',
                 unsafe_allow_html=True
             )
-        if higher == "yes":
+        if higher_display == "Yes":
             st.markdown(
-                '<div class="key-factor positive">• Aspires for higher education</div>',
+                '<div class="key-factor positive">• Motivated for higher education</div>',
                 unsafe_allow_html=True
             )
-
-    # Display feature importance from Random Forest
-        if hasattr(model, 'feature_importances_'):
-        st.markdown(
-            '<div class="section-title">📊 Top Model Features (Random Forest)</div>',
-            unsafe_allow_html=True
-        )
-        importances = pd.DataFrame({
-            'Feature': input_df.columns,
-            'Importance': model.feature_importances_
-        }).sort_values('Importance', ascending=False).head(5)
-        st.bar_chart(importances.set_index('Feature'))
+        if famsup_display == "Yes":
+            st.markdown(
+                '<div class="key-factor positive">• Strong family support</div>',
+                unsafe_allow_html=True
+            )
 
 # FOOTER
 st.markdown("---")
 st.caption(
     "Built by SMJ • Student Performance ML System\n"
-    "**Model:** RandomForestClassifier + LabelEncoder, 80/20 train/test, "
-    "Tuned with GridSearchCV.  \n"
-    "**Metrics:** F1≈0.76, Acc≈0.66  \n\n"
+    "**Model:** RandomForestClassifier, 80/20 train/test, Tuned with GridSearchCV  \n"
+    "**Performance:** F1≈0.78, Accuracy≈0.66 on 395 students\n\n"
     "Made with ❤️"
 )
