@@ -278,8 +278,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **SMJ**
 
-- GitHub: [@yourusername](https://github.com/Ph0enix22)
-- LinkedIn: [your-profile](https://linkedin.com/in/syeda-midhath)
+- GitHub: [@Ph0enix22](https://github.com/Ph0enix22)
+- LinkedIn: [Syeda Midhath Javeria](https://linkedin.com/in/syeda-midhath)
 - Email: syedamidhath159@gmail.com
 
 ---
