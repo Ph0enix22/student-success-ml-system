@@ -48,7 +48,7 @@ with st.sidebar:
     st.write("3. Review prediction & recommendations")
     st.markdown("---")
     st.markdown(
-        "**Random Forest Classifier**  \n"
+        "**Decision Tree Classifier (Tuned)**  \n"
         "UCI Student Dataset  \n\n"
         "**Author:** SMJ  \n"
         "[GitHub](https://github.com/Ph0enix22)"
@@ -57,9 +57,9 @@ with st.sidebar:
 # LOAD MODEL & ENCODERS
 @st.cache_resource
 def load_artifacts():
-    """Load the trained Random Forest model and label encoders from disk."""
+    """Load the trained Decision Tree model and label encoders from disk."""
     try:
-        with open('models/random_forest_model.pkl', 'rb') as f:
+        with open('models/decision_tree_model.pkl', 'rb') as f:
             model = pickle.load(f)
         with open('models/label_encoders.pkl', 'rb') as f:
             encoders = pickle.load(f)
@@ -336,7 +336,7 @@ if submit:
 st.markdown("---")
 st.caption(
     "Built by SMJ • Student Performance ML System\n"
-    "**Model:** RandomForestClassifier, 80/20 train/test, Tuned with GridSearchCV  \n"
+    "**Model:** Decision Tree (Tuned), 80/20 train/test, GridSearchCV  \n"
     "**Performance:** F1≈0.78, Accuracy≈0.66 on 395 students\n\n"
     "Made with ❤️"
 )
